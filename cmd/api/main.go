@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"garage-api/internal/config"
@@ -13,7 +11,6 @@ import (
 	"garage-api/internal/models"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -38,7 +35,10 @@ func main() {
 
 	// Load configuration
 	log.Println("⚙️ Loading application configuration...")
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("❌ Failed to load configuration: %v", err)
+	}
 	log.Printf("📊 Database Configuration:\n  Host: %s\n  Port: %d\n  User: %s\n  Database: %s\n  SSL Mode: %s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBSSLMode)
 
@@ -50,12 +50,9 @@ func main() {
 	}
 	log.Println("✅ Database connection established successfully")
 
-	// Auto-migrate models
-	log.Println("🔄 Running database migrations...")
-	if err := db.AutoMigrate(&models.User{}, &models.Product{}); err != nil {
-		log.Fatalf("❌ Failed to run migrations: %v", err)
-	}
-	log.Println("✅ Database migrations completed successfully")
+	// Initialize models
+	productModel := &models.ProductModel{DB: db}
+	productHandler := &handlers.ProductHandler{ProductModel: productModel}
 
 	// Initialize router
 	log.Println("🛠️ Setting up router...")
@@ -77,7 +74,7 @@ func main() {
 	{
 		public.POST("/register", handlers.Register)
 		public.POST("/login", handlers.Login)
-		public.GET("/products", handlers.GetAllProducts)
+		public.GET("/products", productHandler.GetAllProducts)
 		public.GET("/health", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"status": "ok",
@@ -91,10 +88,10 @@ func main() {
 	protected := router.Group("/api/v1")
 	protected.Use(middleware.JWTAuth())
 	{
-		protected.POST("/products", handlers.CreateProduct)
-		protected.GET("/products/:id", handlers.GetProduct)
-		protected.PUT("/products/:id", handlers.UpdateProduct)
-		protected.DELETE("/products/:id", handlers.DeleteProduct)
+		protected.POST("/products", productHandler.CreateProduct)
+		protected.GET("/products/:id", productHandler.GetProductByID)
+		protected.PUT("/products/:id", productHandler.UpdateProduct)
+		protected.DELETE("/products/:id", productHandler.DeleteProduct)
 	}
 
 	// Start server

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -29,17 +30,17 @@ func GenerateToken(username string) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
+func JWTAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
-		if len(bearerToken) != 2 {
-			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		if len(bearerToken) != 2 || bearerToken[0] != "Bearer" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
 			return
 		}
 
@@ -55,18 +56,20 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				http.Error(w, "Invalid token signature", http.StatusUnauthorized)
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token signature"})
 				return
 			}
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
 		if !token.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
-		next.ServeHTTP(w, r)
-	})
+		// Add claims to context
+		c.Set("username", claims.Username)
+		c.Next()
+	}
 } 
