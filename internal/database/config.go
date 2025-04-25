@@ -3,22 +3,17 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"garage-api/internal/config"
 	_ "github.com/lib/pq"
 )
 
-type Config struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
-}
+func NewConnection() (*sql.DB, error) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config: %v", err)
+	}
 
-func NewConnection(config *Config) (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		config.Host, config.Port, config.User, config.Password, config.DBName)
-	
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("postgres", cfg.GetDSN())
 	if err != nil {
 		return nil, err
 	}

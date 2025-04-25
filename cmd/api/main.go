@@ -108,17 +108,8 @@ func updateProductHandler(w http.ResponseWriter, r *http.Request) {}
 func deleteProductHandler(w http.ResponseWriter, r *http.Request) {}
 
 func main() {
-	// Database configuration
-	dbConfig := &database.Config{
-		Host:     "192.168.1.2",
-		Port:     5432,
-		User:     "casaos",
-		Password: "casaos",
-		DBName:   "garage-web",
-	}
-
 	// Connect to database
-	db, err := database.NewConnection(dbConfig)
+	db, err := database.NewConnection()
 	if err != nil {
 		log.Fatal("Database connection failed: ", err)
 	}
