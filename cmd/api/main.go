@@ -20,8 +20,13 @@ import (
 // @title Garage API
 // @version 1.0
 // @description API for managing garage products and users
-// @host localhost:8080
+// @host api.garage.example.com
 // @BasePath /api/v1
+// @schemes https
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	log.Println("🚀 Starting Garage API...")
 	log.Println("📝 Loading environment variables...")
