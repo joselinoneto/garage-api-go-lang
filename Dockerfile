@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build stage
-FROM --platform=linux/arm/v7 golang:1.21-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev git
@@ -19,20 +19,23 @@ RUN go mod tidy
 # Copy source code
 COPY . .
 
-# Build the application for ARM v7 (Raspberry Pi)
+# Build the application
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -o main cmd/api/main.go
 
 # Final stage
-FROM --platform=linux/arm/v7 alpine:latest
+FROM alpine:latest
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates tzdata wget
+RUN apk add --no-cache ca-certificates tzdata
 
 # Set working directory
 WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /app/main .
+
+# Copy migrations if they exist
+COPY --from=builder /app/migrations ./migrations
 
 # Expose port
 EXPOSE 8080
