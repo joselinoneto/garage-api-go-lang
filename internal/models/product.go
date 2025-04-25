@@ -5,13 +5,14 @@ import (
 	"errors"
 )
 
+// Product represents a product in the garage
 type Product struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description,omitempty"`
-	Price       float64 `json:"price"`
-	ImagePath   string  `json:"image_path,omitempty"`
-	HTMLContent string  `json:"html_content,omitempty"`
+	ID          int     `json:"id" example:"1"`
+	Name        string  `json:"name" example:"Hammer"`
+	Description string  `json:"description,omitempty" example:"A sturdy hammer for construction"`
+	Price       float64 `json:"price" example:"29.99"`
+	ImagePath   string  `json:"image_path,omitempty" example:"/images/hammer.jpg"`
+	HTMLContent string  `json:"html_content,omitempty" example:"<p>Product details in HTML</p>"`
 }
 
 type ProductModel struct {
