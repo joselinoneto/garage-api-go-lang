@@ -78,6 +78,12 @@ func main() {
 		public.POST("/register", handlers.Register)
 		public.POST("/login", handlers.Login)
 		public.GET("/products", handlers.GetAllProducts)
+		public.GET("/health", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"status": "ok",
+				"time":   time.Now().Format(time.RFC3339),
+			})
+		})
 	}
 
 	// Protected routes
