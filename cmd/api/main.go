@@ -20,7 +20,7 @@ import (
 // @title Garage API
 // @version 1.0
 // @description API for managing garage products and users
-// @host api.garage.example.com
+// @host 192.168.1.2
 // @BasePath /api/v1
 // @schemes https
 // @securityDefinitions.apikey Bearer
