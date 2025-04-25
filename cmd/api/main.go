@@ -20,9 +20,9 @@ import (
 // @title Garage API
 // @version 1.0
 // @description API for managing garage products and users
-// @host 192.168.1.2
+// @host 192.168.1.2:8080
 // @BasePath /api/v1
-// @schemes https
+// @schemes http
 // @securityDefinitions.apikey Bearer
 // @in header
 // @name Authorization
