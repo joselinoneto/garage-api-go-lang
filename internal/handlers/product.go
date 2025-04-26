@@ -9,7 +9,7 @@ import (
 )
 
 type ProductHandler struct {
-	ProductModel *models.ProductModel
+	ProductModel models.ProductModelInterface
 }
 
 // CreateProductRequest represents the request body for creating a product
@@ -171,6 +171,10 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	}
 
 	if err := h.ProductModel.Delete(id); err != nil {
+		if err.Error() == "product not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

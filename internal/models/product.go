@@ -15,6 +15,15 @@ type Product struct {
 	HTMLContent string  `json:"html_content,omitempty" example:"<p>Product details in HTML</p>"`
 }
 
+// ProductModelInterface defines the methods that a product model must implement
+type ProductModelInterface interface {
+	GetAll() ([]Product, error)
+	Get(id int) (*Product, error)
+	Create(product *Product) error
+	Update(product *Product) error
+	Delete(id int) error
+}
+
 type ProductModel struct {
 	DB *sql.DB
 }
